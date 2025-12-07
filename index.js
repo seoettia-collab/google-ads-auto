@@ -3,10 +3,15 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
 
-const wf1Routes = require('./routes/wf1.js');   // ← AJOUT ICI
-
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Import routes
+const wf1Routes = require('./routes/wf1.js');
+const configRoutes = require('./routes/config.js');
+const dataRoutes = require('./routes/data.js');
+const securityRoutes = require('./routes/security.js');
+const reportsRoutes = require('./routes/reports.js');
 
 // Middleware
 app.use(cors());
@@ -15,11 +20,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 // Routes
-app.use('/api/config', require('./routes/config.js'));
-app.use('/api', require('./routes/data'));
-app.use('/api', require('./routes/security'));
-app.use('/api', require('./routes/reports'));
-app.use('/api', wf1Routes);   // ← AJOUT ICI
+app.use('/api/config', configRoutes);
+app.use('/api', dataRoutes);
+app.use('/api', securityRoutes);
+app.use('/api', reportsRoutes);
+app.use('/api', wf1Routes);   // ← WF1 correctement branché
 
 // Route principale
 app.get('/', (req, res) => {
