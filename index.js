@@ -26,6 +26,9 @@ app.use((req, res, next) => {
   next();
 });
 
+// Servir les fichiers statiques du dossier /public
+app.use(express.static(path.join(__dirname, 'public')));
+
 // ======================================
 // ROUTES WF1 (inline pour déploiement simple)
 // ======================================
