@@ -1,7 +1,7 @@
 // ======================================
 // GOOGLE ADS AUTO - BACKEND PRINCIPAL
 // ======================================
-// Version: 1.0.0
+// Version: 1.1.0
 // Backend pour n8n workflows WF1, WF2, WF3, WF4
 
 const express = require('express');
@@ -30,6 +30,15 @@ app.use((req, res, next) => {
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ======================================
+// ROUTES WF2 & WF3 (modules externes)
+// ======================================
+const wf2Routes = require('./routes/wf2');
+const wf3Routes = require('./routes/wf3');
+
+app.use('/api/wf2', wf2Routes);
+app.use('/api/wf3', wf3Routes);
+
+// ======================================
 // ROUTES WF1 (inline pour déploiement simple)
 // ======================================
 
@@ -52,7 +61,7 @@ app.get('/api/wf1/data-collect', async (req, res) => {
       success: true,
       message: 'Backend Google Ads Auto - Opérationnel',
       timestamp: timestamp,
-      version: '1.0.0',
+      version: '1.1.0',
       endpoints: {
         ping: '/api/wf1/data-collect',
         save: '/api/wf1/save-report',
@@ -212,7 +221,7 @@ app.get('/health', (req, res) => {
 app.get('/', (req, res) => {
   res.json({
     name: 'Google Ads Auto Backend',
-    version: '1.0.0',
+    version: '1.1.0',
     status: 'running',
     endpoints: {
       health: '/health',
@@ -220,7 +229,16 @@ app.get('/', (req, res) => {
       wf1_ping: '/api/wf1/data-collect',
       wf1_save: '/api/wf1/save-report',
       wf1_last: '/api/wf1/last-report',
-      wf1_history: '/api/wf1/reports-history'
+      wf1_history: '/api/wf1/reports-history',
+      wf2_recommendations: '/api/wf2/last-recommendations',
+      wf2_save: '/api/wf2/save-recommendations',
+      wf2_status: '/api/wf2/status',
+      wf3_limits: '/api/wf3/get-limits',
+      wf3_update_limits: '/api/wf3/update-limits',
+      wf3_save_execution: '/api/wf3/save-execution',
+      wf3_last_execution: '/api/wf3/last-execution',
+      wf3_history: '/api/wf3/executions-history',
+      wf3_status: '/api/wf3/status'
     }
   });
 });
@@ -430,6 +448,8 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`📍 Port: ${PORT}`);
   console.log(`🌐 URL: http://localhost:${PORT}`);
   console.log(`✅ Routes WF1 activées`);
+  console.log(`✅ Routes WF2 activées`);
+  console.log(`✅ Routes WF3 activées`);
   console.log(`⏰ Started: ${new Date().toISOString()}`);
   console.log('===========================================');
 });
