@@ -1,0 +1,54 @@
+{
+  "forbidden_actions": [
+    "MODIFY_BUDGET",
+    "PAUSE_CAMPAIGN",
+    "DELETE_CAMPAIGN",
+    "DELETE_AD_GROUP",
+    "CREATE_CAMPAIGN",
+    "MODIFY_CAMPAIGN_OBJECTIVE"
+  ],
+  "allowed_actions": {
+    "PAUSE_KEYWORD": {
+      "conditions": [
+        "min_clicks >= 50",
+        "ctr < 0.01",
+        "cpa > threshold * 2"
+      ]
+    },
+    "ADD_NEGATIVE": {
+      "conditions": [
+        "min_cost >= 10",
+        "conversions = 0",
+        "min_clicks >= 5"
+      ]
+    },
+    "ADJUST_BID": {
+      "max_decrease_percent": 20,
+      "max_increase_percent": 15,
+      "conditions": [
+        "min_clicks >= 30"
+      ]
+    }
+  },
+  "daily_limits": {
+    "max_keywords_paused": 10,
+    "max_negatives_added": 20,
+    "max_bid_adjustments": 15
+  },
+  "whitelist_rules": {
+    "min_conversions_30d": 1,
+    "max_cpa": 150
+  },
+  "emergency_mode_flow": {
+    "activate": "settings.json → emergency_mode = true",
+    "workflow_block": "WF3 bloque toute action si emergency_mode = true",
+    "notifications": "Email + alerte Dashboard",
+    "reactivation": "emergency_mode = false via API ou Dashboard"
+  },
+  "api_error_handling": {
+    "retries": 3,
+    "retry_delay_sec": 5,
+    "rollback_on_failure": true,
+    "queue_pending_actions": true
+  }
+}

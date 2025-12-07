@@ -1,0 +1,40 @@
+{
+  "keyword_pause": {
+    "min_clicks": 50,
+    "min_impressions": 1000,
+    "min_cost": 20,
+    "max_ctr": 0.01,
+    "min_cpa_ratio": 2.0
+  },
+  "negative_keyword": {
+    "min_clicks": 5,
+    "min_cost": 10,
+    "max_conversions": 0
+  },
+  "bid_adjustment": {
+    "min_clicks": 30,
+    "cpa_threshold_multiplier_decrease": 1.5,
+    "cpa_threshold_multiplier_increase": 0.7,
+    "impression_share_threshold": 50,
+    "max_decrease_percent": 20,
+    "max_increase_percent": 15
+  },
+  "bid_adjustment_logic": {
+    "decrease": {
+      "trigger": "cpa > threshold * 1.5",
+      "step_percent": -10,
+      "max_cumulative_decrease_percent": -20
+    },
+    "increase": {
+      "trigger": "cpa < threshold * 0.7 AND impression_share < 50",
+      "step_percent": 10,
+      "max_cumulative_increase_percent": 15
+    }
+  },
+  "target_cpa": 40,
+  "emergency_thresholds": {
+    "budget_spent_multiplier": 1.5,
+    "cpa_multiplier": 3.0,
+    "zero_conversions_hours": 6
+  }
+}

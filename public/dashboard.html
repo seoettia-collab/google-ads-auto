@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Ads Auto - Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>⚙️ Google Ads Auto - Dashboard</h1>
+      <div class="mode-selector">
+        <label>Mode :</label>
+        <select id="modeSelect">
+          <option value="analyse">Analyse seule</option>
+          <option value="semi-auto">Semi-auto</option>
+          <option value="auto">Auto complet</option>
+        </select>
+      </div>
+    </header>
+
+    <div class="status-bar">
+      <div class="status-item">
+        <span class="label">Statut :</span>
+        <span id="systemStatus" class="value">●</span>
+      </div>
+      <div class="status-item">
+        <span class="label">Mode urgence :</span>
+        <span id="emergencyStatus" class="value">Inactif</span>
+      </div>
+      <div class="status-item">
+        <span class="label">Dernière mise à jour :</span>
+        <span id="lastUpdate" class="value">-</span>
+      </div>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <h3>Keywords pausés</h3>
+        <div class="metric-value" id="keywordsPaused">-</div>
+        <div class="metric-limit">Max: <span id="maxKeywords">10</span></div>
+      </div>
+      <div class="metric-card">
+        <h3>Négatifs ajoutés</h3>
+        <div class="metric-value" id="negativesAdded">-</div>
+        <div class="metric-limit">Max: <span id="maxNegatives">20</span></div>
+      </div>
+      <div class="metric-card">
+        <h3>Ajustements enchères</h3>
+        <div class="metric-value" id="bidAdjustments">-</div>
+        <div class="metric-limit">Max: <span id="maxBids">15</span></div>
+      </div>
+      <div class="metric-card">
+        <h3>Recommandations</h3>
+        <div class="metric-value" id="recommendations">-</div>
+        <div class="metric-limit">Aujourd'hui</div>
+      </div>
+    </div>
+
+    <div class="actions-section">
+      <h2>Actions récentes</h2>
+      <div id="actionsLog">
+        <p class="no-data">Aucune action récente</p>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="refreshBtn" class="btn btn-primary">🔄 Actualiser</button>
+      <button id="emergencyBtn" class="btn btn-danger">🚨 Mode urgence</button>
+      <button id="reportBtn" class="btn btn-success">📊 Générer rapport</button>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
