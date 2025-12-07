@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Google Ads Auto – Dashboard WF1/WF2</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 16px;
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+    h1 {
+      font-size: 1.4rem;
+      margin-bottom: 4px;
+    }
+    h2 {
+      font-size: 1.1rem;
+      margin-top: 24px;
+      margin-bottom: 8px;
+    }
+    .card {
+      background: #111827;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      margin-bottom: 16px;
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #1f2937;
+      color: #9ca3af;
+    }
+    .status-ok {
+      color: #22c55e;
+    }
+    .status-warn {
+      color: #f97316;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .metric {
+      background: #020617;
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+    .metric-label {
+      font-size: 0.75rem;
+      color: #9ca3af;
+    }
+    .metric-value {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+    pre {
+      background: #020617;
+      padding: 12px;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 0.8rem;
+    }
+    button {
+      background: #2563eb;
+      color: #e5e7eb;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    button:active {
+      transform: scale(0.98);
+    }
+    .small {
+      font-size: 0.75rem;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+      <div>
+        <h1>Google Ads Auto – Dernier rapport</h1>
+        <div id="timestamp" class="small">Chargement…</div>
+      </div>
+      <button onclick="loadReport()">Rafraîchir</button>
+    </div>
+
+    <div id="status-tag" class="tag" style="margin-top:10px;">
+      <span>Statut :</span>
+      <strong id="status-value">–</strong>
+    </div>
+
+    <h2>Résumé rapide</h2>
+    <div class="grid">
+      <div class="metric">
+        <div class="metric-label">Budget warnings</div>
+        <div class="metric-value" id="m-budget">0</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Mots-clés négatifs</div>
+        <div class="metric-value" id="m-negatives">0</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Ajustements d'enchères</div>
+        <div class="metric-value" id="m-bids">0</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Problèmes de landing</div>
+        <div class="metric-value" id="m-landing">0</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Détail complet du rapport (JSON)</h2>
+    <pre id="json-raw">Chargement…</pre>
+  </div>
+
+  <script>
+    async function loadReport() {
+      try {
+        const res = await fetch('/api/wf1/last-report');
+        const data = await res.json();
+
+        const ts = data.report?.timestamp || null;
+        document.getElementById('timestamp').textContent =
+          ts ? 'Reçu : ' + new Date(ts).toLocaleString() : 'Aucun rapport disponible';
+
+        const status = data.report?.data?.status || 'unknown';
+        const statusEl = document.getElementById('status-value');
+        statusEl.textContent = status;
+
+        const tag = document.getElementById('status-tag');
+        if (status === 'analysis_complete') {
+          tag.classList.add('status-ok');
+          tag.classList.remove('status-warn');
+        } else {
+          tag.classList.add('status-warn');
+          tag.classList.remove('status-ok');
+        }
+
+        const r = data.report?.data || {};
+        document.getElementById('m-budget').textContent = (r.budget_warnings || []).length;
+        document.getElementById('m-negatives').textContent = (r.add_negative_keywords || []).length;
+        document.getElementById('m-bids').textContent = (r.adjust_bids || []).length;
+        document.getElementById('m-landing').textContent = (r.landing_page_issues || []).length;
+
+        document.getElementById('json-raw').textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById('timestamp').textContent = 'Erreur de chargement';
+        document.getElementById('json-raw').textContent = String(err);
+      }
+    }
+
+    loadReport();
+  </script>
+</body>
+</html>
