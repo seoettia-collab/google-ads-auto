@@ -1,7 +1,7 @@
 // ======================================
 // GOOGLE ADS AUTO - BACKEND PRINCIPAL
 // ======================================
-// Version: 1.1.0
+// Version: 1.2.0
 // Backend pour n8n workflows WF1, WF2, WF3, WF4
 
 const express = require('express');
@@ -30,13 +30,15 @@ app.use((req, res, next) => {
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ======================================
-// ROUTES WF2 & WF3 (modules externes)
+// ROUTES WF2, WF3, WF4 (modules externes)
 // ======================================
 const wf2Routes = require('./routes/wf2');
 const wf3Routes = require('./routes/wf3');
+const wf4Routes = require('./routes/wf4');
 
 app.use('/api/wf2', wf2Routes);
 app.use('/api/wf3', wf3Routes);
+app.use('/api/wf4', wf4Routes);
 
 // ======================================
 // ROUTES WF1 (inline pour déploiement simple)
@@ -61,7 +63,7 @@ app.get('/api/wf1/data-collect', async (req, res) => {
       success: true,
       message: 'Backend Google Ads Auto - Opérationnel',
       timestamp: timestamp,
-      version: '1.1.0',
+      version: '1.2.0',
       endpoints: {
         ping: '/api/wf1/data-collect',
         save: '/api/wf1/save-report',
@@ -221,7 +223,7 @@ app.get('/health', (req, res) => {
 app.get('/', (req, res) => {
   res.json({
     name: 'Google Ads Auto Backend',
-    version: '1.1.0',
+    version: '1.2.0',
     status: 'running',
     endpoints: {
       health: '/health',
@@ -238,7 +240,12 @@ app.get('/', (req, res) => {
       wf3_save_execution: '/api/wf3/save-execution',
       wf3_last_execution: '/api/wf3/last-execution',
       wf3_history: '/api/wf3/executions-history',
-      wf3_status: '/api/wf3/status'
+      wf3_status: '/api/wf3/status',
+      wf4_save: '/api/wf4/save-report',
+      wf4_last: '/api/wf4/last-report',
+      wf4_reports: '/api/wf4/reports',
+      wf4_dashboard: '/api/wf4/dashboard',
+      wf4_latest_html: '/api/wf4/latest-html'
     }
   });
 });
@@ -450,6 +457,7 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ Routes WF1 activées`);
   console.log(`✅ Routes WF2 activées`);
   console.log(`✅ Routes WF3 activées`);
+  console.log(`✅ Routes WF4 activées`);
   console.log(`⏰ Started: ${new Date().toISOString()}`);
   console.log('===========================================');
 });
