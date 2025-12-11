@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Google Ads Auto – Dashboard global</title>
+  <title>Google Ads Auto – Dashboard V3</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     /* =========================
@@ -15,58 +15,92 @@
     }
 
     :root {
+      /* Dark theme (default) */
       --bg: #020617;
-      --bg-alt: #030711;
-      --bg-card: rgba(15, 23, 42, 0.9);
-      --bg-card-soft: rgba(17, 24, 39, 0.85);
+      --bg-alt: #0a0f1a;
+      --bg-card: rgba(15, 23, 42, 0.85);
+      --bg-card-solid: #0f172a;
       --accent: #4f46e5;
-      --accent-soft: rgba(79, 70, 229, 0.18);
-      --accent-strong: #6366f1;
       --accent-2: #0ea5e9;
-      --danger: #f97373;
+      --accent-3: #8b5cf6;
+      --danger: #ef4444;
       --success: #22c55e;
-      --warning: #facc15;
-      --border: rgba(148, 163, 184, 0.3);
-      --border-soft: rgba(31, 41, 55, 0.9);
-      --text: #f9fafb;
-      --muted: #9ca3af;
-      --muted-soft: #6b7280;
-      --shadow-soft: 0 18px 40px rgba(15, 23, 42, 0.9);
-      --radius-lg: 18px;
+      --warning: #f59e0b;
+      --border: rgba(148, 163, 184, 0.2);
+      --text: #f8fafc;
+      --text-secondary: #e2e8f0;
+      --muted: #94a3b8;
+      --muted-soft: #64748b;
+      --radius-lg: 16px;
       --radius-md: 12px;
-      --radius-sm: 999px;
-      --font: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-              "Segoe UI", sans-serif;
+      --radius-sm: 8px;
+      --font: 'Inter', system-ui, -apple-system, sans-serif;
+      --shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    [data-theme="light"] {
+      --bg: #f8fafc;
+      --bg-alt: #f1f5f9;
+      --bg-card: rgba(255, 255, 255, 0.9);
+      --bg-card-solid: #ffffff;
+      --border: rgba(148, 163, 184, 0.3);
+      --text: #0f172a;
+      --text-secondary: #1e293b;
+      --muted: #64748b;
+      --muted-soft: #94a3b8;
+      --shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+    }
+
+    @keyframes gradientFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     body {
       min-height: 100vh;
       font-family: var(--font);
-      background:
-        radial-gradient(circle at 0% -10%, rgba(56, 189, 248, 0.16), transparent 65%),
-        radial-gradient(circle at 100% 110%, rgba(129, 140, 248, 0.20), transparent 60%),
-        radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.95), #020617);
+      background: var(--bg);
       color: var(--text);
+      transition: background 0.3s ease, color 0.3s ease;
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Scrollbars propres */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #020617;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #111827;
-      border-radius: 999px;
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 0%, rgba(79, 70, 229, 0.12), transparent 50%),
+        radial-gradient(ellipse at 80% 100%, rgba(14, 165, 233, 0.1), transparent 50%);
+      pointer-events: none;
+      z-index: -1;
+      opacity: 1;
+      transition: opacity 0.3s ease;
     }
 
+    [data-theme="light"] body::before {
+      opacity: 0.5;
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--muted-soft); border-radius: 999px; }
+
     .page {
-      max-width: 1220px;
+      max-width: 1400px;
       margin: 0 auto;
-      padding: 22px 16px 40px;
+      padding: 0 16px 40px;
     }
 
     /* =========================
@@ -75,41 +109,62 @@
     header {
       position: sticky;
       top: 0;
-      z-index: 10;
-      backdrop-filter: blur(18px);
-      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.96), rgba(2, 6, 23, 0.96));
-      border-radius: 0 0 20px 20px;
-      border-bottom: 1px solid rgba(148, 163, 184, 0.15);
-      margin: -22px -16px 20px;
-      padding: 14px 18px 14px;
+      z-index: 100;
+      padding: 16px 20px;
+      margin: 0 -16px 20px;
+      background: linear-gradient(135deg, 
+        rgba(15, 23, 42, 0.95), 
+        rgba(30, 41, 59, 0.9));
+      background-size: 200% 200%;
+      animation: gradientFlow 10s ease infinite;
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      transition: background 0.3s ease;
+    }
+
+    [data-theme="light"] header {
+      background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95), 
+        rgba(241, 245, 249, 0.9));
+    }
+
+    .header-content {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 14px;
-      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.8);
+      gap: 16px;
+      flex-wrap: wrap;
     }
 
-    .header-main {
+    .header-left {
       display: flex;
       flex-direction: column;
       gap: 4px;
     }
 
-    h1 {
-      font-size: 1.35rem;
-      font-weight: 600;
-      letter-spacing: 0.01em;
+    .logo-row {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
 
-    .brand-dot {
-      width: 9px;
-      height: 20px;
-      border-radius: 999px;
-      background: linear-gradient(180deg, var(--accent-2), var(--accent-strong));
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent-2), var(--accent), var(--accent-3));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+    }
+
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text);
     }
 
     .subtitle {
@@ -123,435 +178,1050 @@
       gap: 10px;
     }
 
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      border-radius: var(--radius-sm);
-      padding: 5px 12px;
-      font-size: 0.75rem;
-      border: 1px solid var(--border);
-      background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.18), rgba(15, 23, 42, 0.95));
-      box-shadow: 0 8px 25px rgba(15, 23, 42, 0.7);
-      white-space: nowrap;
-    }
-
-    .pill-dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 999px;
-      box-shadow: 0 0 12px currentColor;
-    }
-
-    .dot-ok { color: var(--success); background: var(--success); }
-    .dot-warn { color: var(--warning); background: var(--warning); }
-    .dot-bad { color: var(--danger); background: var(--danger); }
-
-    button {
-      border-radius: var(--radius-sm);
-      border: none;
-      padding: 6px 14px;
-      font-size: 0.8rem;
-      cursor: pointer;
-      background: radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.6), rgba(79, 70, 229, 0.92));
-      color: var(--text);
-      display: inline-flex;
+    .status-pill {
+      display: flex;
       align-items: center;
       gap: 6px;
-      box-shadow:
-        0 12px 30px rgba(15, 23, 42, 0.95),
-        0 0 24px rgba(56, 189, 248, 0.5);
-      transition: transform 0.12s ease-out, box-shadow 0.12s ease-out,
-                  filter 0.12s ease-out;
-      white-space: nowrap;
+      padding: 6px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 0.75rem;
     }
 
-    button:hover {
-      filter: brightness(1.05);
-      transform: translateY(-1px);
-      box-shadow:
-        0 16px 40px rgba(15, 23, 42, 1),
-        0 0 26px rgba(79, 70, 229, 0.6);
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--warning);
+      box-shadow: 0 0 8px currentColor;
+    }
+    .status-dot.ok { background: var(--success); }
+    .status-dot.error { background: var(--danger); }
+
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
 
-    button:active {
-      transform: translateY(0);
-      box-shadow:
-        0 8px 22px rgba(15, 23, 42, 0.9),
-        0 0 16px rgba(79, 70, 229, 0.45);
+    .theme-toggle:hover {
+      border-color: var(--accent);
     }
 
-    button span.icon {
-      font-size: 0.9rem;
+    .btn-primary {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-3));
+      border: none;
+      border-radius: 999px;
+      color: white;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.5);
     }
 
     /* =========================
-       GRID MÉTRIQUES
+       TABS NAVIGATION
     ========================== */
-    .grid {
+    .tabs-nav {
+      display: flex;
+      gap: 4px;
+      padding: 4px;
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      margin-bottom: 20px;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      flex: 1;
+      min-width: 120px;
+      padding: 10px 16px;
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-sm);
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+      background: rgba(79, 70, 229, 0.1);
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--accent), var(--accent-3));
+      color: white;
+      box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* =========================
+       CARDS
+    ========================== */
+    .cards-grid {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 14px;
-      margin-bottom: 22px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
     }
 
-    @media (max-width: 980px) {
-      .grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-    }
-
-    @media (max-width: 640px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
-      header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      .header-right {
-        width: 100%;
-        justify-content: space-between;
-      }
+    @media (max-width: 1100px) { .cards-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px) { 
+      .cards-grid { grid-template-columns: 1fr; }
+      .header-content { flex-direction: column; align-items: stretch; }
+      .header-right { justify-content: space-between; }
     }
 
     .card {
-      position: relative;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
       border-radius: var(--radius-lg);
-      padding: 14px 16px 13px;
-      background: radial-gradient(circle at 0 0, rgba(79, 70, 229, 0.16), rgba(15, 23, 42, 0.98));
-      border: 1px solid rgba(148, 163, 184, 0.45);
-      box-shadow: var(--shadow-soft);
+      padding: 16px;
+      backdrop-filter: blur(10px);
+      transition: all 0.2s ease;
+      position: relative;
       overflow: hidden;
-      isolation: isolate;
-      backdrop-filter: blur(18px);
-      transition: transform 0.14s ease-out, box-shadow 0.14s ease-out,
-                  border-color 0.14s ease-out;
-    }
-
-    .card::before {
-      content: "";
-      position: absolute;
-      inset: -60%;
-      background:
-        radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.18), transparent 55%),
-        radial-gradient(circle at 100% 100%, rgba(129, 140, 248, 0.18), transparent 55%);
-      opacity: 0.8;
-      z-index: -1;
     }
 
     .card:hover {
       transform: translateY(-2px);
-      box-shadow:
-        0 24px 50px rgba(15, 23, 42, 0.95),
-        0 0 22px rgba(56, 189, 248, 0.32);
-      border-color: rgba(129, 140, 248, 0.9);
+      border-color: rgba(79, 70, 229, 0.4);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     }
 
-    .card-title {
-      font-size: 0.76rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--muted-soft);
-      margin-bottom: 8px;
+    .card-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      gap: 8px;
+      align-items: flex-start;
+      margin-bottom: 12px;
     }
 
-    .card-main {
-      font-size: 1.45rem;
-      font-weight: 600;
+    .card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
       display: flex;
-      align-items: baseline;
-      gap: 6px;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      background: rgba(79, 70, 229, 0.15);
+      border: 1px solid rgba(79, 70, 229, 0.3);
     }
 
-    .card-main span.label {
-      font-size: 0.86rem;
+    .card-icon.wf1 { background: rgba(14, 165, 233, 0.15); border-color: rgba(14, 165, 233, 0.3); }
+    .card-icon.wf2 { background: rgba(139, 92, 246, 0.15); border-color: rgba(139, 92, 246, 0.3); }
+    .card-icon.wf3 { background: rgba(34, 197, 94, 0.15); border-color: rgba(34, 197, 94, 0.3); }
+    .card-icon.security { background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.3); }
+
+    .tag {
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 0.6rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border: 1px solid;
+    }
+
+    .tag-blue { background: rgba(14, 165, 233, 0.15); border-color: rgba(14, 165, 233, 0.4); color: #7dd3fc; }
+    .tag-purple { background: rgba(139, 92, 246, 0.15); border-color: rgba(139, 92, 246, 0.4); color: #c4b5fd; }
+    .tag-green { background: rgba(34, 197, 94, 0.15); border-color: rgba(34, 197, 94, 0.4); color: #86efac; }
+    .tag-amber { background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.4); color: #fcd34d; }
+    .tag-red { background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.4); color: #fca5a5; }
+
+    .card-title {
+      font-size: 0.7rem;
       color: var(--muted);
-      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+
+    .card-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .card-label {
+      font-size: 0.8rem;
+      color: var(--muted-soft);
+      margin-top: 2px;
     }
 
     .card-sub {
-      font-size: 0.82rem;
+      font-size: 0.75rem;
       color: var(--muted);
-      margin-top: 6px;
-      max-width: 90%;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
     }
 
-    .tag {
-      border-radius: var(--radius-sm);
-      border: 1px solid rgba(148, 163, 184, 0.6);
-      padding: 3px 9px;
+    .card-timestamp {
       font-size: 0.65rem;
-      text-transform: uppercase;
-      letter-spacing: 0.11em;
-      white-space: nowrap;
-    }
-
-    .tag-blue {
-      border-color: rgba(56, 189, 248, 0.9);
-      color: #e0f2fe;
-      background: linear-gradient(135deg, rgba(56,189,248,0.14), rgba(15,23,42,0.8));
-    }
-
-    .tag-green {
-      border-color: rgba(34, 197, 94, 0.9);
-      color: #dcfce7;
-      background: linear-gradient(135deg, rgba(34,197,94,0.12), rgba(15,23,42,0.86));
-    }
-
-    .tag-amber {
-      border-color: rgba(245, 158, 11, 0.9);
-      color: #ffedd5;
-      background: linear-gradient(135deg, rgba(245,158,11,0.14), rgba(15,23,42,0.85));
-    }
-
-    .timestamp {
-      font-size: 0.74rem;
       color: var(--muted-soft);
       margin-top: 6px;
     }
 
     /* =========================
-       SECTION JSON
+       ACTIVITY PULSE
     ========================== */
-    .section-title {
-      font-size: 0.86rem;
-      margin: 10px 0 8px;
+    .activity-pulse {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      padding: 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+    }
+
+    .pulse-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pulse-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--muted-soft);
+      box-shadow: 0 0 15px currentColor;
+      animation: pulse 2s infinite;
+    }
+
+    .pulse-dot.active { background: var(--success); }
+    .pulse-dot.warning { background: var(--warning); }
+    .pulse-dot.danger { background: var(--danger); }
+
+    .pulse-label {
+      font-size: 0.7rem;
       color: var(--muted);
       text-transform: uppercase;
-      letter-spacing: 0.14em;
+      letter-spacing: 0.05em;
+    }
+
+    /* =========================
+       TAB 2: IA & RECOMMENDATIONS
+    ========================== */
+    .ia-layout {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .ia-layout { grid-template-columns: 1fr; }
+    }
+
+    .ia-summary {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+    }
+
+    .ia-summary h3 {
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stat-row:last-child { border-bottom: none; }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .stat-value {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .reco-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 500px;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    .reco-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .reco-card:hover {
+      border-color: var(--accent);
+    }
+
+    .reco-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .reco-type {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .reco-body {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .reco-body strong {
+      color: var(--text);
+    }
+
+    .reco-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .confidence-bar {
+      width: 100px;
+      height: 6px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .confidence-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-2), var(--accent));
+      border-radius: 999px;
+    }
+
+    .source-badge {
+      font-size: 0.6rem;
+      padding: 2px 6px;
+      background: rgba(139, 92, 246, 0.2);
+      border-radius: 4px;
+      color: #c4b5fd;
+    }
+
+    /* =========================
+       TAB 3: ACTIONS & SECURITY
+    ========================== */
+    .actions-layout {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .actions-layout { grid-template-columns: 1fr; }
+    }
+
+    .timeline-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+    }
+
+    .timeline-section h3 {
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      max-height: 450px;
+      overflow-y: auto;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+
+    .timeline-item:last-child { border-bottom: none; }
+
+    .timeline-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--success);
+      margin-top: 4px;
+      flex-shrink: 0;
+    }
+
+    .timeline-dot.blocked { background: var(--warning); }
+    .timeline-dot.error { background: var(--danger); }
+
+    .timeline-content {
+      flex: 1;
+    }
+
+    .timeline-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .timeline-action {
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .timeline-time {
+      font-size: 0.65rem;
+      color: var(--muted-soft);
+    }
+
+    .timeline-details {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .timeline-mode {
+      display: inline-block;
+      font-size: 0.6rem;
+      padding: 1px 5px;
+      background: rgba(34, 197, 94, 0.2);
+      border-radius: 4px;
+      color: #86efac;
+      margin-left: 6px;
+    }
+
+    .timeline-mode.live { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+
+    .security-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .limits-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+    }
+
+    .limits-card h3 {
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .limit-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+    }
+
+    .limit-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .limit-value {
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .limit-bar {
+      width: 100%;
+      height: 6px;
+      background: var(--border);
+      border-radius: 999px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .limit-fill {
+      height: 100%;
+      background: var(--success);
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+
+    .limit-fill.warning { background: var(--warning); }
+    .limit-fill.danger { background: var(--danger); }
+
+    .heatmap-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+    }
+
+    .heatmap-card h4 {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .heatmap {
+      display: flex;
+      gap: 4px;
+      justify-content: space-between;
+    }
+
+    .heatmap-day {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .heatmap-bar {
+      width: 100%;
+      height: 40px;
+      background: rgba(79, 70, 229, 0.2);
+      border-radius: 4px;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .heatmap-fill {
+      width: 100%;
+      background: linear-gradient(180deg, var(--accent), var(--accent-2));
+      border-radius: 4px;
+      transition: height 0.3s ease;
+    }
+
+    .heatmap-label {
+      font-size: 0.6rem;
+      color: var(--muted-soft);
+    }
+
+    /* =========================
+       TAB 4: LOGS & DEBUG
+    ========================== */
+    .logs-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .filter-input {
+      flex: 1;
+      min-width: 200px;
+      padding: 8px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 0.8rem;
+    }
+
+    .filter-input::placeholder {
+      color: var(--muted-soft);
+    }
+
+    .filter-input:focus {
+      outline: none;
+      border-color: var(--accent);
     }
 
     .json-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
     }
 
-    @media (max-width: 980px) {
-      .json-grid {
-        grid-template-columns: 1fr;
-      }
+    @media (max-width: 900px) {
+      .json-grid { grid-template-columns: 1fr; }
     }
 
     .json-card {
-      background: radial-gradient(circle at 0 0, rgba(15, 23, 42, 0.98), #020617);
+      background: var(--bg-card-solid);
+      border: 1px solid var(--border);
       border-radius: var(--radius-md);
-      border: 1px solid var(--border-soft);
-      padding: 9px 10px 10px;
-      box-shadow: 0 14px 32px rgba(15, 23, 42, 0.9);
+      overflow: hidden;
+    }
+
+    .json-card.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .json-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background: rgba(0, 0, 0, 0.2);
+      border-bottom: 1px solid var(--border);
     }
 
     .json-title {
-      font-size: 0.78rem;
-      color: var(--muted);
-      margin-bottom: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
       display: flex;
-      justify-content: space-between;
       align-items: center;
       gap: 6px;
     }
 
     .json-badge {
-      font-size: 0.65rem;
-      padding: 2px 7px;
+      font-size: 0.55rem;
+      padding: 2px 6px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-3));
       border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.55);
-      color: #e5e7eb;
+      color: white;
+      font-weight: 600;
+    }
+
+    .btn-copy {
+      padding: 4px 10px;
+      background: rgba(79, 70, 229, 0.2);
+      border: 1px solid rgba(79, 70, 229, 0.3);
+      border-radius: 6px;
+      color: var(--muted);
+      font-size: 0.65rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-copy:hover {
+      background: rgba(79, 70, 229, 0.4);
+      color: white;
     }
 
     pre {
       margin: 0;
-      font-family: "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      font-size: 0.74rem;
-      line-height: 1.4;
-      max-height: 260px;
+      padding: 14px;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.7rem;
+      line-height: 1.5;
+      color: var(--text-secondary);
+      max-height: 300px;
       overflow: auto;
-      background: radial-gradient(circle at 0 0, #020617, #020617);
-      color: #e5e7eb;
-      border-radius: 8px;
-      padding: 8px 9px;
-      border: 1px solid #020617;
+      background: transparent;
     }
 
-    .error {
-      font-size: 0.8rem;
-      color: var(--danger);
-      margin-top: 8px;
+    /* =========================
+       FOOTER
+    ========================== */
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 0.7rem;
+      color: var(--muted-soft);
     }
 
-    #global-error:empty {
-      display: none;
+    .footer a {
+      color: var(--accent-2);
+      text-decoration: none;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--muted);
+    }
+
+    .empty-state-icon {
+      font-size: 2rem;
+      margin-bottom: 12px;
     }
   </style>
 </head>
-<body>
+<body data-theme="dark">
   <div class="page">
+    <!-- HEADER -->
     <header>
-      <div class="header-main">
-        <h1>
-          <span class="brand-dot"></span>
-          <span>Google Ads Auto – Dashboard global</span>
-        </h1>
-        <div class="subtitle">
-          Vue synthétique : <strong>WF1</strong> (données) · <strong>WF2</strong> (IA) · <strong>WF3</strong> (actions & sécurité).
+      <div class="header-content">
+        <div class="header-left">
+          <div class="logo-row">
+            <div class="logo-icon">📊</div>
+            <h1>Google Ads Auto – Dashboard V3</h1>
+          </div>
+          <div class="subtitle">Supervision WF1 / WF2 / WF3 en temps réel</div>
         </div>
-      </div>
-      <div class="header-right">
-        <div class="pill" id="backend-pill">
-          <span class="pill-dot dot-warn" id="backend-dot"></span>
-          <span id="backend-status-label">Backend : inconnu</span>
+        <div class="header-right">
+          <div class="status-pill">
+            <span class="status-dot" id="backend-dot"></span>
+            <span id="backend-status-label">Vérification...</span>
+          </div>
+          <button class="theme-toggle" onclick="toggleTheme()">
+            <span id="theme-icon">🌙</span>
+            <span id="theme-label">Dark</span>
+          </button>
+          <button class="btn-primary" onclick="refreshAll()">
+            🔄 Rafraîchir
+          </button>
         </div>
-        <button onclick="refreshAll()">
-          <span class="icon">🔄</span>
-          <span>Rafraîchir</span>
-        </button>
       </div>
     </header>
 
-    <!-- Résumé global -->
-    <div class="grid">
-      <!-- WF1 -->
-      <div class="card">
-        <div class="card-title">
-          <span>WF1 – Données</span>
-          <span class="tag tag-blue" id="wf1-status-tag">STATUT INCONNU</span>
+    <!-- TABS NAVIGATION -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab('overview')">📈 Vue globale</button>
+      <button class="tab-btn" onclick="switchTab('ia')">🧠 IA & Recos</button>
+      <button class="tab-btn" onclick="switchTab('actions')">⚡ Actions & Sécurité</button>
+      <button class="tab-btn" onclick="switchTab('logs')">🔍 Logs & Debug</button>
+    </div>
+
+    <!-- TAB 1: OVERVIEW -->
+    <div id="tab-overview" class="tab-content active">
+      <div class="cards-grid">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon wf1">🗄️</div>
+            <span class="tag tag-blue" id="wf1-status-tag">INCONNU</span>
+          </div>
+          <div class="card-title">WF1 – Données</div>
+          <div class="card-value" id="wf1-budgets">0</div>
+          <div class="card-label">alertes budget</div>
+          <div class="card-sub" id="wf1-sub">Chargement...</div>
+          <div class="card-timestamp" id="wf1-ts"></div>
         </div>
-        <div class="card-main">
-          <span id="wf1-budgets">0</span>
-          <span class="label">alertes budget</span>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon wf2">🧠</div>
+            <span class="tag tag-purple" id="wf2-status-tag">EN ATTENTE</span>
+          </div>
+          <div class="card-title">WF2 – IA</div>
+          <div class="card-value" id="wf2-recos">0</div>
+          <div class="card-label">recommandations</div>
+          <div class="card-sub" id="wf2-sub">Chargement...</div>
+          <div class="card-timestamp" id="wf2-ts"></div>
         </div>
-        <div class="card-sub" id="wf1-sub">
-          Aucun rapport WF1 trouvé.
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon wf3">⚡</div>
+            <span class="tag tag-green" id="wf3-status-tag">MODE TEST</span>
+          </div>
+          <div class="card-title">WF3 – Actions</div>
+          <div class="card-value" id="wf3-actions">0</div>
+          <div class="card-label">actions totales</div>
+          <div class="card-sub" id="wf3-sub">Chargement...</div>
+          <div class="card-timestamp" id="wf3-ts"></div>
         </div>
-        <div class="timestamp" id="wf1-ts"></div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon security">🛡️</div>
+            <span class="tag tag-amber" id="sec-status-tag">NORMAL</span>
+          </div>
+          <div class="card-title">Sécurité</div>
+          <div class="card-value" id="wf3-limits-used">0</div>
+          <div class="card-label">actions / jour</div>
+          <div class="card-sub" id="sec-sub">Chargement...</div>
+          <div class="card-timestamp" id="sec-ts"></div>
+        </div>
       </div>
 
-      <!-- WF2 -->
-      <div class="card">
-        <div class="card-title">
-          <span>WF2 – IA (Claude + GPT)</span>
-          <span class="tag tag-amber" id="wf2-status-tag">EN ATTENTE</span>
+      <div class="activity-pulse">
+        <div class="pulse-item">
+          <div class="pulse-dot" id="pulse-ia"></div>
+          <span class="pulse-label">IA (WF2)</span>
         </div>
-        <div class="card-main">
-          <span id="wf2-recos">0</span>
-          <span class="label">recommandations</span>
+        <div class="pulse-item">
+          <div class="pulse-dot" id="pulse-actions"></div>
+          <span class="pulse-label">Actions (WF3)</span>
         </div>
-        <div class="card-sub" id="wf2-sub">
-          Aucune recommandation reçue pour l'instant.
+        <div class="pulse-item">
+          <div class="pulse-dot" id="pulse-security"></div>
+          <span class="pulse-label">Sécurité</span>
         </div>
-        <div class="timestamp" id="wf2-ts"></div>
-      </div>
-
-      <!-- WF3 -->
-      <div class="card">
-        <div class="card-title">
-          <span>WF3 – Actions</span>
-          <span class="tag tag-green" id="wf3-status-tag">MODE TEST</span>
-        </div>
-        <div class="card-main">
-          <span id="wf3-actions">0</span>
-          <span class="label">actions totales</span>
-        </div>
-        <div class="card-sub" id="wf3-sub">
-          Aucune exécution enregistrée.
-        </div>
-        <div class="timestamp" id="wf3-ts"></div>
-      </div>
-
-      <!-- Sécurité / limites -->
-      <div class="card">
-        <div class="card-title">
-          <span>Sécurité & limites (WF3)</span>
-          <span class="tag" id="sec-status-tag">NORMAL</span>
-        </div>
-        <div class="card-main">
-          <span id="wf3-limits-used">0</span>
-          <span class="label">actions / jour</span>
-        </div>
-        <div class="card-sub" id="sec-sub">
-          Limites WF3 : chargement en cours…
-        </div>
-        <div class="timestamp" id="sec-ts"></div>
       </div>
     </div>
 
-    <!-- JSON détaillé -->
-    <div class="section-title">Détail complet (JSON brut)</div>
-    <div class="json-grid">
-      <div class="json-card">
-        <div class="json-title">
-          <span>WF1 – Dernier rapport</span>
-          <span class="json-badge">DATA</span>
+    <!-- TAB 2: IA & RECOMMENDATIONS -->
+    <div id="tab-ia" class="tab-content">
+      <div class="ia-layout">
+        <div class="ia-summary">
+          <h3>🧠 Résumé IA</h3>
+          <div class="stat-row">
+            <span class="stat-label">Total recommandations</span>
+            <span class="stat-value" id="ia-total">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">PAUSE_KEYWORD</span>
+            <span class="stat-value" id="ia-pause">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">ADJUST_BID</span>
+            <span class="stat-value" id="ia-bid">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">ADD_NEGATIVE</span>
+            <span class="stat-value" id="ia-negative">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Confiance moyenne</span>
+            <span class="stat-value" id="ia-confidence">—</span>
+          </div>
         </div>
-        <pre id="json-wf1">{ "message": "En attente de chargement…" }</pre>
-      </div>
-      <div class="json-card">
-        <div class="json-title">
-          <span>WF2 – Dernières recommandations</span>
-          <span class="json-badge">IA</span>
+
+        <div class="reco-list" id="reco-list">
+          <div class="empty-state">
+            <div class="empty-state-icon">📭</div>
+            <p>Aucune recommandation disponible</p>
+          </div>
         </div>
-        <pre id="json-wf2">{ "message": "En attente de chargement…" }</pre>
-      </div>
-      <div class="json-card">
-        <div class="json-title">
-          <span>WF3 – Dernière exécution</span>
-          <span class="json-badge">ACTIONS</span>
-        </div>
-        <pre id="json-wf3">{ "message": "En attente de chargement…" }</pre>
       </div>
     </div>
 
-    <div class="error" id="global-error"></div>
+    <!-- TAB 3: ACTIONS & SECURITY -->
+    <div id="tab-actions" class="tab-content">
+      <div class="actions-layout">
+        <div class="timeline-section">
+          <h3>⏱️ Timeline des actions</h3>
+          <div class="timeline" id="timeline">
+            <div class="empty-state">
+              <div class="empty-state-icon">📋</div>
+              <p>Aucune action enregistrée</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="security-panel">
+          <div class="limits-card">
+            <h3>🛡️ Limites journalières</h3>
+            <div class="limit-row">
+              <span class="limit-label">Pause keywords</span>
+              <span class="limit-value"><span id="limit-pause-used">0</span> / 10</span>
+            </div>
+            <div class="limit-bar">
+              <div class="limit-fill" id="limit-pause-bar" style="width: 0%"></div>
+            </div>
+
+            <div class="limit-row" style="margin-top:12px">
+              <span class="limit-label">Bid adjustments</span>
+              <span class="limit-value"><span id="limit-bid-used">0</span> / 15</span>
+            </div>
+            <div class="limit-bar">
+              <div class="limit-fill" id="limit-bid-bar" style="width: 0%"></div>
+            </div>
+
+            <div class="limit-row" style="margin-top:12px">
+              <span class="limit-label">Negative keywords</span>
+              <span class="limit-value"><span id="limit-neg-used">0</span> / 20</span>
+            </div>
+            <div class="limit-bar">
+              <div class="limit-fill" id="limit-neg-bar" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="heatmap-card">
+            <h4>Activité 7 derniers jours</h4>
+            <div class="heatmap" id="heatmap">
+              <div class="heatmap-day"><div class="heatmap-bar"><div class="heatmap-fill" style="height:20%"></div></div><span class="heatmap-label">L</span></div>
+              <div class="heatmap-day"><div class="heatmap-bar"><div class="heatmap-fill" style="height:40%"></div></div><span class="heatmap-label">M</span></div>
+              <div class="heatmap-day"><div class="heatmap-bar"><div class="heatmap-fill" style="height:60%"></div></div><span class="heatmap-label">M</span></div>
+              <div class="heatmap-day"><div class="heatmap-bar"><div class="heatmap-fill" style="height:30%"></div></div><span class="heatmap-label">J</span></div>
+              <div class="heatmap-day"><div class="heatmap-bar"><div class="heatmap-fill" style="height:80%"></div></div><span class="heatmap-label">V</span></div>
+              <div class="heatmap-day"><div class="heatmap-bar"><div class="heatmap-fill" style="height:10%"></div></div><span class="heatmap-label">S</span></div>
+              <div class="heatmap-day"><div class="heatmap-bar"><div class="heatmap-fill" style="height:50%"></div></div><span class="heatmap-label">D</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: LOGS & DEBUG -->
+    <div id="tab-logs" class="tab-content">
+      <div class="logs-header">
+        <input type="text" class="filter-input" id="json-filter" placeholder="🔍 Filtrer dans le JSON..." oninput="filterJson()">
+      </div>
+      <div class="json-grid">
+        <div class="json-card">
+          <div class="json-header">
+            <div class="json-title">
+              WF1 – Dernier rapport
+              <span class="json-badge">DATA</span>
+            </div>
+            <button class="btn-copy" onclick="copyJson('json-wf1')">📋 Copier</button>
+          </div>
+          <pre id="json-wf1">{ "message": "Chargement..." }</pre>
+        </div>
+        <div class="json-card">
+          <div class="json-header">
+            <div class="json-title">
+              WF2 – Recommandations
+              <span class="json-badge">IA</span>
+            </div>
+            <button class="btn-copy" onclick="copyJson('json-wf2')">📋 Copier</button>
+          </div>
+          <pre id="json-wf2">{ "message": "Chargement..." }</pre>
+        </div>
+        <div class="json-card full-width">
+          <div class="json-header">
+            <div class="json-title">
+              WF3 – Dernière exécution
+              <span class="json-badge">ACTIONS</span>
+            </div>
+            <button class="btn-copy" onclick="copyJson('json-wf3')">📋 Copier</button>
+          </div>
+          <pre id="json-wf3">{ "message": "Chargement..." }</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      <p>Google Ads Auto v1.1.0 – Mistral Pro Reno – Dashboard V3</p>
+      <p><a href="/wf1-dashboard.html">WF1 Simple</a> · <a href="/health">Backend Status</a></p>
+    </div>
   </div>
 
   <script>
+    // =====================
+    // TAB SWITCHING
+    // =====================
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + tabId).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    // =====================
+    // THEME TOGGLE
+    // =====================
+    function toggleTheme() {
+      const body = document.body;
+      const isDark = body.getAttribute('data-theme') === 'dark';
+      body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.getElementById('theme-icon').textContent = isDark ? '☀️' : '🌙';
+      document.getElementById('theme-label').textContent = isDark ? 'Light' : 'Dark';
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    }
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      document.body.setAttribute('data-theme', savedTheme);
+      document.getElementById('theme-icon').textContent = savedTheme === 'dark' ? '🌙' : '☀️';
+      document.getElementById('theme-label').textContent = savedTheme === 'dark' ? 'Dark' : 'Light';
+    }
+
+    // =====================
+    // UTILITIES
+    // =====================
     async function fetchJson(url) {
       const res = await fetch(url);
       if (!res.ok) throw new Error("HTTP " + res.status);
       return res.json();
     }
 
-    function safeString(v) {
-      if (!v && v !== 0) return "—";
-      return String(v);
-    }
-
     function formatTs(ts) {
       if (!ts) return "";
-      try {
-        return "Dernière mise à jour : " + new Date(ts).toLocaleString();
-      } catch {
-        return "";
-      }
+      try { return new Date(ts).toLocaleString(); } catch { return ""; }
     }
 
-    async function refreshAll() {
-      document.getElementById("global-error").textContent = "";
+    function copyJson(id) {
+      navigator.clipboard.writeText(document.getElementById(id).textContent);
+      alert('JSON copié !');
+    }
 
+    function filterJson() {
+      const filter = document.getElementById('json-filter').value.toLowerCase();
+      ['json-wf1', 'json-wf2', 'json-wf3'].forEach(id => {
+        const el = document.getElementById(id);
+        const text = el.textContent;
+        if (filter && !text.toLowerCase().includes(filter)) {
+          el.parentElement.style.opacity = '0.3';
+        } else {
+          el.parentElement.style.opacity = '1';
+        }
+      });
+    }
+
+    // Store raw data
+    let wf2Data = null;
+    let wf3Data = null;
+
+    // =====================
+    // MAIN REFRESH
+    // =====================
+    async function refreshAll() {
       // Backend health
       try {
         const health = await fetchJson("/health");
-        const backendDot = document.getElementById("backend-dot");
-        const backendLabel = document.getElementById("backend-status-label");
+        const dot = document.getElementById("backend-dot");
+        const label = document.getElementById("backend-status-label");
         if (health && health.status === "ok") {
-          backendDot.classList.remove("dot-warn","dot-bad");
-          backendDot.classList.add("dot-ok");
-          backendLabel.textContent = "Backend : opérationnel (" + (health.version || "v?") + ")";
+          dot.classList.remove("error");
+          dot.classList.add("ok");
+          label.textContent = "Backend OK";
         } else {
-          backendDot.classList.remove("dot-ok");
-          backendDot.classList.add("dot-warn");
-          backendLabel.textContent = "Backend : réponse inattendue";
+          dot.classList.remove("ok");
+          label.textContent = "Backend: inattendu";
         }
       } catch (e) {
-        const backendDot = document.getElementById("backend-dot");
-        backendDot.classList.remove("dot-ok","dot-warn");
-        backendDot.classList.add("dot-bad");
-        document.getElementById("backend-status-label").textContent = "Backend : erreur";
+        document.getElementById("backend-dot").classList.add("error");
+        document.getElementById("backend-status-label").textContent = "Backend: erreur";
       }
 
       // WF1
@@ -561,85 +1231,199 @@
 
         const report = wf1.report || {};
         const data = report.data || {};
-
         const budgets = (data.budget_warnings || []).length || 0;
         const negs = (data.add_negative_keywords || []).length || 0;
         const bids = (data.adjust_bids || []).length || 0;
         const issues = (data.landing_page_issues || []).length || 0;
 
         document.getElementById("wf1-budgets").textContent = budgets;
-        document.getElementById("wf1-sub").textContent =
-          negs + " mots-clés négatifs · " +
-          bids + " ajustements d'enchères · " +
-          issues + " problèmes de landing";
-
-        document.getElementById("wf1-status-tag").textContent =
+        document.getElementById("wf1-sub").textContent = 
+          `${negs} négatifs · ${bids} enchères · ${issues} landing`;
+        document.getElementById("wf1-status-tag").textContent = 
           (data.status || "INCONNU").toUpperCase();
-        document.getElementById("wf1-ts").textContent =
-          formatTs(report.timestamp || wf1.timestamp || null);
+        document.getElementById("wf1-ts").textContent = formatTs(report.timestamp);
       } catch (e) {
-        document.getElementById("wf1-sub").textContent = "Impossible de charger WF1.";
+        document.getElementById("wf1-sub").textContent = "Erreur chargement";
       }
 
       // WF2
       try {
         const wf2 = await fetchJson("/api/wf2/last-recommendations");
+        wf2Data = wf2;
         document.getElementById("json-wf2").textContent = JSON.stringify(wf2, null, 2);
 
         const recos = wf2.recommendations || (wf2.data && wf2.data.recommendations) || [];
         const count = recos.length || 0;
 
         document.getElementById("wf2-recos").textContent = count;
-        document.getElementById("wf2-sub").textContent =
-          count > 0
-            ? "Recommandations prêtes pour WF3."
-            : "Aucune recommandation active.";
-
-        document.getElementById("wf2-status-tag").textContent =
+        document.getElementById("wf2-sub").textContent = 
+          count > 0 ? "Recommandations prêtes" : "Aucune recommandation";
+        document.getElementById("wf2-status-tag").textContent = 
           (wf2.status || "ANALYSE").toUpperCase();
-        document.getElementById("wf2-ts").textContent =
-          formatTs(wf2.analysis_date || wf2.timestamp || wf2.last_run_at);
+        document.getElementById("wf2-ts").textContent = formatTs(wf2.analysis_date || wf2.timestamp);
+
+        // Update IA tab
+        updateIATab(recos);
+
+        // Pulse
+        const pulseIA = document.getElementById("pulse-ia");
+        pulseIA.className = "pulse-dot " + (count > 0 ? "active" : "");
       } catch (e) {
-        document.getElementById("wf2-sub").textContent = "Impossible de charger WF2.";
+        document.getElementById("wf2-sub").textContent = "Erreur chargement";
       }
 
-      // WF3 last execution
+      // WF3
       try {
         const wf3 = await fetchJson("/api/wf3/last-execution");
+        wf3Data = wf3;
         document.getElementById("json-wf3").textContent = JSON.stringify(wf3, null, 2);
 
         const exec = wf3.execution || wf3.data || {};
         const stats = exec.stats || {};
         const total = stats.total_actions || stats.actions_total || 0;
+        const executed = stats.executed || stats.actions_executed || 0;
+        const blocked = stats.blocked || stats.actions_blocked || 0;
 
         document.getElementById("wf3-actions").textContent = total;
-        document.getElementById("wf3-sub").textContent =
-          total > 0
-            ? (stats.executed || stats.actions_executed || 0) + " exécutées · " +
-              (stats.blocked || stats.actions_blocked || 0) + " bloquées"
-            : "Aucune exécution enregistrée.";
-
-        document.getElementById("wf3-status-tag").textContent =
+        document.getElementById("wf3-sub").textContent = 
+          total > 0 ? `${executed} OK · ${blocked} bloquées` : "Aucune exécution";
+        document.getElementById("wf3-status-tag").textContent = 
           (exec.mode || "TEST").toUpperCase();
-        document.getElementById("wf3-ts").textContent =
-          formatTs(exec.timestamp || wf3.timestamp || wf3.last_run_at);
+        document.getElementById("wf3-ts").textContent = formatTs(exec.timestamp || wf3.timestamp);
 
-        // Limites / sécurité
-        const used =
-          (stats.executed || 0) +
-          (stats.blocked || 0);
-        document.getElementById("wf3-limits-used").textContent = used;
-        document.getElementById("sec-sub").textContent =
-          "Dernière exécution : " + safeString(exec.mode || "TEST");
-        document.getElementById("sec-ts").textContent =
-          formatTs(exec.timestamp || wf3.timestamp || null);
+        // Security card
+        document.getElementById("wf3-limits-used").textContent = executed + blocked;
+        document.getElementById("sec-sub").textContent = "Mode: " + (exec.mode || "TEST");
+        document.getElementById("sec-ts").textContent = formatTs(exec.timestamp);
+
+        // Update Actions tab
+        updateActionsTab(exec);
+
+        // Pulse
+        document.getElementById("pulse-actions").className = 
+          "pulse-dot " + (total > 0 ? "active" : "");
+        document.getElementById("pulse-security").className = 
+          "pulse-dot " + (blocked > 0 ? "warning" : "active");
       } catch (e) {
-        document.getElementById("wf3-sub").textContent = "Impossible de charger WF3.";
-        document.getElementById("sec-sub").textContent = "Erreur chargement WF3.";
+        document.getElementById("wf3-sub").textContent = "Erreur chargement";
+        document.getElementById("sec-sub").textContent = "Erreur chargement";
       }
     }
 
-    // Chargement automatique
+    // =====================
+    // UPDATE IA TAB
+    // =====================
+    function updateIATab(recos) {
+      document.getElementById("ia-total").textContent = recos.length;
+
+      let pause = 0, bid = 0, neg = 0, totalConf = 0;
+      recos.forEach(r => {
+        if (r.action_type === "PAUSE_KEYWORD") pause++;
+        else if (r.action_type === "ADJUST_BID") bid++;
+        else if (r.action_type === "ADD_NEGATIVE") neg++;
+        totalConf += r.confidence_score || 0;
+      });
+
+      document.getElementById("ia-pause").textContent = pause;
+      document.getElementById("ia-bid").textContent = bid;
+      document.getElementById("ia-negative").textContent = neg;
+      document.getElementById("ia-confidence").textContent = 
+        recos.length > 0 ? (totalConf / recos.length * 100).toFixed(0) + "%" : "—";
+
+      // Build reco cards
+      const list = document.getElementById("reco-list");
+      if (recos.length === 0) {
+        list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><p>Aucune recommandation</p></div>';
+        return;
+      }
+
+      list.innerHTML = recos.map(r => {
+        const tagClass = r.action_type === "PAUSE_KEYWORD" ? "tag-red" :
+                        r.action_type === "ADJUST_BID" ? "tag-blue" : "tag-green";
+        const conf = (r.confidence_score || 0) * 100;
+        return `
+          <div class="reco-card">
+            <div class="reco-header">
+              <div class="reco-type">
+                <span class="tag ${tagClass}">${r.action_type || 'ACTION'}</span>
+              </div>
+              <span class="source-badge">${r.source || 'IA'}</span>
+            </div>
+            <div class="reco-body">
+              ${r.keyword_text ? `<strong>Keyword:</strong> ${r.keyword_text}<br>` : ''}
+              ${r.campaign_id ? `Campaign: ${r.campaign_id}` : ''}
+              ${r.reason ? `<br><em>${r.reason}</em>` : ''}
+            </div>
+            <div class="reco-footer">
+              <div class="confidence-bar">
+                <div class="confidence-fill" style="width:${conf}%"></div>
+              </div>
+              <span style="font-size:0.7rem;color:var(--muted)">${conf.toFixed(0)}%</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // =====================
+    // UPDATE ACTIONS TAB
+    // =====================
+    function updateActionsTab(exec) {
+      const results = exec.results || exec.actions || [];
+      const timeline = document.getElementById("timeline");
+
+      if (results.length === 0) {
+        timeline.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div><p>Aucune action</p></div>';
+        return;
+      }
+
+      timeline.innerHTML = results.slice(0, 10).map(a => {
+        const dotClass = a.executed ? "" : (a.blocked ? "blocked" : "error");
+        const mode = a.mode || exec.mode || "TEST";
+        const modeClass = mode === "LIVE" ? "live" : "";
+        return `
+          <div class="timeline-item">
+            <div class="timeline-dot ${dotClass}"></div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <span class="timeline-action">${a.action_type || 'ACTION'}</span>
+                <span class="timeline-time">${formatTs(a.timestamp) || '—'}</span>
+              </div>
+              <div class="timeline-details">
+                ${a.keyword_text || a.criterion_id || '—'}
+                <span class="timeline-mode ${modeClass}">${mode}</span>
+                ${a.reason ? `<br><em>${a.reason}</em>` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Update limits (simulated based on exec stats)
+      const stats = exec.stats || {};
+      const pauseUsed = stats.pause_count || 0;
+      const bidUsed = stats.bid_count || 0;
+      const negUsed = stats.negative_count || 0;
+
+      document.getElementById("limit-pause-used").textContent = pauseUsed;
+      document.getElementById("limit-bid-used").textContent = bidUsed;
+      document.getElementById("limit-neg-used").textContent = negUsed;
+
+      updateLimitBar("limit-pause-bar", pauseUsed, 10);
+      updateLimitBar("limit-bid-bar", bidUsed, 15);
+      updateLimitBar("limit-neg-bar", negUsed, 20);
+    }
+
+    function updateLimitBar(id, used, max) {
+      const bar = document.getElementById(id);
+      const pct = Math.min((used / max) * 100, 100);
+      bar.style.width = pct + "%";
+      bar.classList.remove("warning", "danger");
+      if (pct >= 90) bar.classList.add("danger");
+      else if (pct >= 70) bar.classList.add("warning");
+    }
+
+    // Auto-load
     refreshAll();
   </script>
 </body>
