@@ -1,7 +1,7 @@
 // ======================================
 // GOOGLE ADS AUTO - BACKEND PRINCIPAL
 // ======================================
-// Version: 2.0.0
+// Version: 2.0.1
 // Backend avec PostgreSQL (Supabase)
 
 const express = require('express');
@@ -201,7 +201,7 @@ app.get('/api/wf1/data-collect', async (req, res) => {
       timestamp: new Date().toISOString(),
       database: 'connected',
       db_time: dbCheck.rows[0].now,
-      version: '2.0.0'
+      version: '2.0.1'
     });
   } catch (error) {
     res.status(500).json({
@@ -451,6 +451,61 @@ app.get('/api/wf3/executions-history', async (req, res) => {
   }
 });
 
+// ROUTE: WF3 Executions (alias pour Dashboard)
+app.get('/api/wf3/executions', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+    const query = `
+      SELECT * FROM wf3_executions 
+      ORDER BY created_at DESC 
+      LIMIT $1
+    `;
+    const result = await pool.query(query, [limit]);
+    
+    if (result.rows.length === 0) {
+      return res.json({
+        success: true,
+        message: 'Aucune exécution disponible',
+        execution: null,
+        executions: []
+      });
+    }
+    
+    const row = result.rows[0];
+    res.json({
+      success: true,
+      execution: {
+        id: row.execution_id,
+        timestamp: row.created_at,
+        mode: row.mode,
+        data: row.data,
+        summary: {
+          total_recommendations: row.total_recommendations,
+          security_allowed: row.security_allowed,
+          security_blocked: row.security_blocked,
+          executed: row.actions_executed,
+          errors: row.errors_count
+        }
+      },
+      executions: result.rows.map(r => ({
+        id: r.execution_id,
+        timestamp: r.created_at,
+        mode: r.mode,
+        summary: {
+          total_recommendations: r.total_recommendations,
+          security_allowed: r.security_allowed,
+          security_blocked: r.security_blocked,
+          executed: r.actions_executed,
+          errors: r.errors_count
+        }
+      }))
+    });
+    
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // ROUTE: Get WF3 Daily Limits
 app.get('/api/wf3/get-limits', async (req, res) => {
   try {
@@ -544,7 +599,7 @@ app.get('/health', async (req, res) => {
       db_time: dbCheck.rows[0].now,
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
-      version: '2.0.0'
+      version: '2.0.1'
     });
   } catch (error) {
     res.json({
@@ -560,7 +615,7 @@ app.get('/health', async (req, res) => {
 app.get('/', (req, res) => {
   res.json({
     name: 'Google Ads Auto Backend',
-    version: '2.0.0',
+    version: '2.0.1',
     database: 'PostgreSQL (Supabase)',
     status: 'running',
     endpoints: {
@@ -606,7 +661,7 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log('===========================================');
-  console.log('🚀 Google Ads Auto - Backend v2.0.0');
+  console.log('🚀 Google Ads Auto - Backend v2.0.1');
   console.log('===========================================');
   console.log(`📍 Port: ${PORT}`);
   console.log(`🌐 URL: http://localhost:${PORT}`);
