@@ -1,8 +1,9 @@
 // ======================================
 // GOOGLE ADS AUTO - BACKEND PRINCIPAL
 // ======================================
-// Version: 2.0.1
+// Version: 2.1.0
 // Backend avec PostgreSQL (Supabase)
+// + Routes WF2 Analyzer complètes
 
 const express = require('express');
 const cors = require('cors');
@@ -122,7 +123,65 @@ app.post('/api/wf1/save-report', async (req, res) => {
   }
 });
 
-// ROUTE: Get last WF1 Report
+// ROUTE: Get latest WF1 Report (FORMAT WF2 ANALYZER)
+app.get('/api/wf1/latest', async (req, res) => {
+  try {
+    const query = `
+      SELECT * FROM wf1_reports 
+      ORDER BY created_at DESC 
+      LIMIT 1
+    `;
+    const result = await pool.query(query);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'No WF1 report found' });
+    }
+    
+    const row = result.rows[0];
+    
+    // Parse data JSON if stored as string
+    let parsedData = row.data;
+    if (typeof parsedData === 'string') {
+      try {
+        parsedData = JSON.parse(parsedData);
+      } catch (e) {
+        console.error('Error parsing WF1 data:', e);
+        parsedData = {};
+      }
+    }
+    
+    // Format pour WF2 Analyzer
+    const report = {
+      report_id: row.report_id,
+      customer_id: row.customer_id,
+      campaign_id: parsedData?.campaign_id || '',
+      campaign_name: row.campaign_name || parsedData?.campaign_name || '',
+      totals: parsedData?.totals || {
+        today: { impressions: 0, clicks: 0, cost_euros: 0, ctr: 0 },
+        last_30_days: { impressions: 0, clicks: 0, cost_euros: 0, ctr: 0 }
+      },
+      counts: parsedData?.counts || {
+        keywords: row.keywords_count,
+        ad_groups: row.ad_groups_count
+      },
+      entities: parsedData?.entities || {
+        keywords: [],
+        search_terms: [],
+        ad_groups: []
+      },
+      collection_status: parsedData?.collection_status || {},
+      created_at: row.created_at
+    };
+    
+    res.json(report);
+    
+  } catch (error) {
+    console.error('❌ WF1 latest error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ROUTE: Get last WF1 Report (legacy format)
 app.get('/api/wf1/last-report', async (req, res) => {
   try {
     const query = `
@@ -201,7 +260,7 @@ app.get('/api/wf1/data-collect', async (req, res) => {
       timestamp: new Date().toISOString(),
       database: 'connected',
       db_time: dbCheck.rows[0].now,
-      version: '2.0.1'
+      version: '2.1.0'
     });
   } catch (error) {
     res.status(500).json({
@@ -213,57 +272,75 @@ app.get('/api/wf1/data-collect', async (req, res) => {
 });
 
 // ======================================
-// ROUTES WF2 - RECOMMENDATIONS (PostgreSQL)
+// ROUTES WF2 - ANALYZER & RECOMMENDATIONS
 // ======================================
 
-// ROUTE: Save WF2 Recommendations
+// ROUTE: Save WF2 Recommendations (FORMAT WF2 ANALYZER)
 app.post('/api/wf2/save-recommendations', async (req, res) => {
   try {
-    const data = req.body;
-    const recoId = `wf2_${Date.now()}`;
+    const payload = req.body;
     
-    const recommendations = data.recommendations_final || data.recommendations || [];
+    // Support both old and new format
+    const reportId = payload.report_id || `wf2_${Date.now()}`;
+    const recommendations = payload.recommendations || payload.recommendations_final || [];
     
+    // Count by action type
     const negativesCount = recommendations.filter(r => 
       r.action === 'ADD_NEGATIVE_KEYWORD' || r.action === 'ADD_NEGATIVE'
     ).length;
     
     const bidAdjustmentsCount = recommendations.filter(r => 
-      r.action === 'LOWER_BID' || r.action === 'RAISE_BID' || r.action === 'ADJUST_BID'
+      r.action === 'LOWER_BID' || r.action === 'RAISE_BID' || 
+      r.action === 'ADJUST_BID' || r.action === 'REVIEW_BID'
     ).length;
     
     const pauseCount = recommendations.filter(r => 
       r.action === 'PAUSE_KEYWORD'
     ).length;
     
+    const protectCount = recommendations.filter(r => 
+      r.action === 'PROTECT'
+    ).length;
+    
     const query = `
       INSERT INTO wf2_recommendations (
         recommendation_id, wf1_report_id, data,
         total_recommendations, negatives_count, 
-        bid_adjustments_count, pause_keywords_count
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+        bid_adjustments_count, pause_keywords_count,
+        status
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING id, recommendation_id, created_at
     `;
     
     const values = [
-      recoId,
-      data.wf1_report_id || null,
-      JSON.stringify(data),
+      reportId,
+      payload.source_wf1_id || payload.wf1_report_id || null,
+      JSON.stringify(payload),
       recommendations.length,
       negativesCount,
       bidAdjustmentsCount,
-      pauseCount
+      pauseCount,
+      'PENDING'
     ];
     
     const result = await pool.query(query, values);
     
-    console.log(`✅ WF2 Recommendations saved: ${recoId}`);
+    console.log(`✅ WF2 Recommendations saved: ${reportId}`);
+    console.log(`   - Total: ${recommendations.length}`);
+    console.log(`   - Pause: ${pauseCount}, Bid: ${bidAdjustmentsCount}, Negative: ${negativesCount}, Protect: ${protectCount}`);
     
     res.json({
       success: true,
       message: 'WF2 Recommendations saved',
-      recommendation_id: recoId,
+      report_id: reportId,
+      recommendation_id: reportId,
       total_recommendations: recommendations.length,
+      summary: {
+        pause_keywords: pauseCount,
+        bid_adjustments: bidAdjustmentsCount,
+        negatives: negativesCount,
+        protect: protectCount
+      },
       created_at: result.rows[0].created_at
     });
     
@@ -273,7 +350,53 @@ app.post('/api/wf2/save-recommendations', async (req, res) => {
   }
 });
 
-// ROUTE: Get last WF2 Recommendations
+// ROUTE: Get latest WF2 Recommendations
+app.get('/api/wf2/latest', async (req, res) => {
+  try {
+    const query = `
+      SELECT * FROM wf2_recommendations 
+      ORDER BY created_at DESC 
+      LIMIT 1
+    `;
+    const result = await pool.query(query);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'No WF2 recommendations found' });
+    }
+    
+    const row = result.rows[0];
+    
+    // Parse data if string
+    let parsedData = row.data;
+    if (typeof parsedData === 'string') {
+      try {
+        parsedData = JSON.parse(parsedData);
+      } catch (e) {
+        parsedData = {};
+      }
+    }
+    
+    res.json({
+      report_id: row.recommendation_id,
+      source_wf1_id: row.wf1_report_id,
+      status: row.status || 'PENDING',
+      created_at: row.created_at,
+      data: parsedData,
+      summary: {
+        total: row.total_recommendations,
+        negatives: row.negatives_count,
+        bid_adjustments: row.bid_adjustments_count,
+        pause_keywords: row.pause_keywords_count
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ WF2 latest error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ROUTE: Get last WF2 Recommendations (legacy format)
 app.get('/api/wf2/last-recommendations', async (req, res) => {
   try {
     const query = `
@@ -298,6 +421,7 @@ app.get('/api/wf2/last-recommendations', async (req, res) => {
         id: row.recommendation_id,
         timestamp: row.created_at,
         data: row.data,
+        status: row.status || 'PENDING',
         summary: {
           total: row.total_recommendations,
           negatives: row.negatives_count,
@@ -313,15 +437,141 @@ app.get('/api/wf2/last-recommendations', async (req, res) => {
   }
 });
 
+// ROUTE: Get pending WF2 Recommendations (for WF3)
+app.get('/api/wf2/pending', async (req, res) => {
+  try {
+    const query = `
+      SELECT * FROM wf2_recommendations 
+      WHERE status = 'PENDING' OR status IS NULL
+      ORDER BY created_at DESC
+    `;
+    const result = await pool.query(query);
+    
+    res.json({
+      success: true,
+      count: result.rows.length,
+      recommendations: result.rows.map(row => {
+        let parsedData = row.data;
+        if (typeof parsedData === 'string') {
+          try { parsedData = JSON.parse(parsedData); } catch (e) { parsedData = {}; }
+        }
+        return {
+          report_id: row.recommendation_id,
+          source_wf1_id: row.wf1_report_id,
+          status: row.status || 'PENDING',
+          created_at: row.created_at,
+          data: parsedData,
+          summary: {
+            total: row.total_recommendations,
+            pause_keywords: row.pause_keywords_count,
+            bid_adjustments: row.bid_adjustments_count,
+            negatives: row.negatives_count
+          }
+        };
+      })
+    });
+    
+  } catch (error) {
+    console.error('❌ WF2 pending error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ROUTE: Update WF2 Recommendation Status
+app.patch('/api/wf2/:report_id/status', async (req, res) => {
+  try {
+    const { report_id } = req.params;
+    const { status } = req.body;
+    
+    const validStatuses = ['PENDING', 'APPROVED', 'EXECUTED', 'REJECTED', 'PARTIAL'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ 
+        error: 'Invalid status',
+        valid_statuses: validStatuses 
+      });
+    }
+    
+    const query = `
+      UPDATE wf2_recommendations 
+      SET status = $1, updated_at = NOW()
+      WHERE recommendation_id = $2
+      RETURNING recommendation_id, status, updated_at
+    `;
+    
+    const result = await pool.query(query, [status, report_id]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Recommendation not found' });
+    }
+    
+    console.log(`✅ WF2 status updated: ${report_id} → ${status}`);
+    
+    res.json({
+      success: true,
+      report_id: result.rows[0].recommendation_id,
+      status: result.rows[0].status,
+      updated_at: result.rows[0].updated_at
+    });
+    
+  } catch (error) {
+    console.error('❌ WF2 status update error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ROUTE: WF2 History
+app.get('/api/wf2/history', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+    const query = `
+      SELECT recommendation_id, wf1_report_id, status,
+             total_recommendations, negatives_count, 
+             bid_adjustments_count, pause_keywords_count,
+             created_at
+      FROM wf2_recommendations 
+      ORDER BY created_at DESC 
+      LIMIT $1
+    `;
+    const result = await pool.query(query, [limit]);
+    
+    res.json({
+      success: true,
+      count: result.rows.length,
+      recommendations: result.rows.map(row => ({
+        report_id: row.recommendation_id,
+        source_wf1_id: row.wf1_report_id,
+        status: row.status || 'PENDING',
+        created_at: row.created_at,
+        summary: {
+          total: row.total_recommendations,
+          pause_keywords: row.pause_keywords_count,
+          bid_adjustments: row.bid_adjustments_count,
+          negatives: row.negatives_count
+        }
+      }))
+    });
+    
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // ROUTE: WF2 Status
 app.get('/api/wf2/status', async (req, res) => {
   try {
-    const query = `SELECT COUNT(*) as count FROM wf2_recommendations`;
-    const result = await pool.query(query);
+    const countQuery = `SELECT COUNT(*) as count FROM wf2_recommendations`;
+    const pendingQuery = `SELECT COUNT(*) as pending FROM wf2_recommendations WHERE status = 'PENDING' OR status IS NULL`;
+    
+    const [countResult, pendingResult] = await Promise.all([
+      pool.query(countQuery),
+      pool.query(pendingQuery)
+    ]);
+    
     res.json({
       success: true,
       status: 'active',
-      total_recommendations_saved: parseInt(result.rows[0].count)
+      total_recommendations_saved: parseInt(countResult.rows[0].count),
+      pending_recommendations: parseInt(pendingResult.rows[0].pending)
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -599,7 +849,7 @@ app.get('/health', async (req, res) => {
       db_time: dbCheck.rows[0].now,
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
-      version: '2.0.1'
+      version: '2.1.0'
     });
   } catch (error) {
     res.json({
@@ -615,18 +865,26 @@ app.get('/health', async (req, res) => {
 app.get('/', (req, res) => {
   res.json({
     name: 'Google Ads Auto Backend',
-    version: '2.0.1',
+    version: '2.1.0',
     database: 'PostgreSQL (Supabase)',
     status: 'running',
     endpoints: {
       health: '/health',
+      // WF1
       wf1_save: '/api/wf1/save-report',
+      wf1_latest: '/api/wf1/latest',
       wf1_last: '/api/wf1/last-report',
       wf1_history: '/api/wf1/reports-history',
       wf1_ping: '/api/wf1/data-collect',
+      // WF2
       wf2_save: '/api/wf2/save-recommendations',
+      wf2_latest: '/api/wf2/latest',
       wf2_last: '/api/wf2/last-recommendations',
+      wf2_pending: '/api/wf2/pending',
       wf2_status: '/api/wf2/status',
+      wf2_history: '/api/wf2/history',
+      wf2_update_status: '/api/wf2/:report_id/status',
+      // WF3
       wf3_save: '/api/wf3/save-execution',
       wf3_last: '/api/wf3/last-execution',
       wf3_history: '/api/wf3/executions-history',
@@ -661,13 +919,13 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log('===========================================');
-  console.log('🚀 Google Ads Auto - Backend v2.0.1');
+  console.log('🚀 Google Ads Auto - Backend v2.1.0');
   console.log('===========================================');
   console.log(`📍 Port: ${PORT}`);
   console.log(`🌐 URL: http://localhost:${PORT}`);
   console.log(`🗄️  Database: PostgreSQL (Supabase)`);
   console.log(`✅ Routes WF1 activées`);
-  console.log(`✅ Routes WF2 activées`);
+  console.log(`✅ Routes WF2 activées (+ Analyzer)`);
   console.log(`✅ Routes WF3 activées`);
   console.log(`⏰ Started: ${new Date().toISOString()}`);
   console.log('===========================================');
